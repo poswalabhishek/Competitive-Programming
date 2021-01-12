@@ -22,89 +22,79 @@ Sample Input:
 Sample Output:
 2
 */
-#include <stdio.h>
-#define ll long long
+#include <bits/stdc++.h>
+using namespace std;
 
-struct node
-{
-	int msum, lsum, rsum;
+struct node {
+    int sum, maxSum, prefixSum, suffixSum;
 };
 
-int arr[50010];
-ll sumArr[50010];
-struct node stree[200000];
+void buildTree (int *arr, node *tree, int s, int e, int index) {
+    if (s == e) {
+        tree[index].sum = arr[s];
+        tree[index].maxSum = arr[s];
+        tree[index].prefixSum = arr[s];
+        tree[index].suffixSum = arr[s];
+        return;
+    }
+    int m = (s + e) / 2;
+    int left = 2*index;
+    int right = 2*index + 1;
+    buildTree (arr, tree, s, m, left);
+    buildTree (arr, tree, m + 1, e, right);
 
-int max(int a, int b)
-{
-	int max = a > b ? a : b;
-	return max;
+    tree[index].sum = tree[left].sum + tree[right].sum;
+    tree[index].prefixSum = max (tree[left].prefixSum, tree[left].sum + tree[right].prefixSum);
+    tree[index].suffixSum = max (tree[right].suffixSum, tree[right].sum + tree[left].suffixSum);
+    tree[index].maxSum = max (tree[index].prefixSum, max (tree[index].suffixSum, max (tree[left].maxSum,
+                         max (tree[right].maxSum, tree[left].suffixSum + tree[right].prefixSum))));
 }
 
-void createSegmentTree(int pos, int ss, int se)
-{
-	struct node left, right;
-	if(ss == se)
-		stree[pos].lsum = stree[pos].rsum = stree[pos].msum = arr[ss];
-	else
-	{
-		createSegmentTree(pos * 2, ss, (ss + se) / 2);
-		createSegmentTree(pos * 2 + 1, (ss + se) / 2 + 1, se);
-		left = stree[pos * 2];
-		right = stree[pos * 2 + 1];
-		if(ss == 0)
-			stree[pos].lsum = max(left.lsum, sumArr[(ss + se) / 2] + right.lsum);
-		else
-			stree[pos].lsum = max(left.lsum, sumArr[(ss + se) / 2] - sumArr[ss - 1] + right.lsum);
-		stree[pos].rsum = max(right.rsum, sumArr[se] - sumArr[(ss + se) / 2] + left.rsum);
-		stree[pos].msum = max(left.msum, max(right.msum , left.rsum + right.lsum));
-	}
+node query (node *tree, int s, int e, int l, int r, int index) {
+    node result;
+    result.sum = result.maxSum = result.prefixSum = result.suffixSum = INT_MIN;
+
+    if (s > r || e < l)
+        return result;
+
+    if (s >= l && e <= r)
+        return tree[index];
+
+    int m = (s + e) / 2;
+    
+    if (m < l) 
+        return query (tree, m + 1, e, l, r, 2 * index + 1);
+    if (r <= m) 
+        return query (tree, s, m, l, r, 2 * index);
+    
+    
+    node left = query (tree, s, m, l, r, 2 * index);
+    node right = query (tree, m + 1, e, l, r, 2 * index + 1);
+
+    result.sum = left.sum + right.sum;
+    result.prefixSum = max (left.prefixSum, left.sum + right.prefixSum);
+    result.suffixSum = max (right.suffixSum, right.sum + left.suffixSum);
+    result.maxSum = max (result.prefixSum, max (result.suffixSum, max (left.maxSum,
+                    max (right.maxSum, left.suffixSum + right.prefixSum))));
+
+    return result;
 }
 
-struct node query(int pos, int a, int b, int x, int y)
-{
-	struct node left, right, retVal;
-	if(a == x && b == y)
-		return stree[pos];
-	if(y <= (a + b) / 2)
-		return query(pos * 2, a, (a + b) / 2, x, y);
-	if(x > (a + b) / 2)
-		return query(pos * 2 + 1, (a + b) / 2 + 1, b, x , y);
-	left = query(pos * 2, a, (a + b) / 2, x, (a + b) / 2);
-	right = query(pos * 2 + 1, (a + b) / 2 + 1, b, (a + b) / 2 + 1, y);
-	if(x == 0)
-			retVal.lsum = max(left.lsum, sumArr[(a + b) / 2] + right.lsum);
-		else
-			retVal.lsum = max(left.lsum, sumArr[(a + b) / 2] - sumArr[x - 1] + right.lsum);
-	retVal.rsum = max(right.rsum, sumArr[y] - sumArr[(a + b) / 2] + left.rsum);
-	retVal.msum = max(left.msum, max(right.msum , left.rsum + right.lsum));
+int main () {
+    int n;
+    cin >> n;
+    int arr[n];
+    for (int i = 0; i < n; ++i) 
+        cin >> arr[i];
 
-	return retVal;
-}
-
-
-int main()
-{
-	int n, i, m, x, y;
-
-	scanf("%d", &n);
-
-	scanf("%d", &arr[0]);
-	sumArr[0] = arr[0];
-	for(i = 1 ; i < n ; i++)
-	{
-		scanf("%d", &arr[i]);
-		sumArr[i] = sumArr[i - 1] + arr[i];
-	}
-
-	createSegmentTree(1, 0, n - 1);	
-	scanf("%d", &m);
-
-	for(i = 0 ; i < m ; i++)
-	{
-		scanf("%d %d", &x, &y);
-		x--; y--;
-		printf("%d\n", query(1, 0, n - 1, x, y).msum);
-	}
-
-	return 0;
+    int q;
+    cin >> q;
+    node tree[4*n];
+    buildTree (arr, tree, 0, n - 1, 1);
+    while (q--) {
+        int x, y;
+        cin >> x >> y;
+        node t = query (tree, 0, n - 1, x - 1, y - 1, 1);
+        cout << t.maxSum << endl;
+    }
 }
