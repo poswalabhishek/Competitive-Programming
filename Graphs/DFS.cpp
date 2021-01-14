@@ -40,7 +40,11 @@ int main () {
     for (int i = 0; i < numVertices; ++i)
         visited[i] = false;
 
-    printDFS (edges, numVertices, 0, visited);
+        // for disjoint nodes
+	for (int i = 0; i < numVertices; ++i) {
+        if (!visited[i])
+            printDFS (edges, numVertices, i, visited);
+	}
 
     delete [] visited;
     for (int i = 0; i < numVertices; ++i)
