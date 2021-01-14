@@ -2,10 +2,10 @@
 using namespace std;
 
 void printBFS (int **edges, int numVertices, int startVertex, bool *visited) {
-    
     queue <int> pendingVertices;
     pendingVertices.push(startVertex);
     visited[startVertex] = true;
+    
     while (!pendingVertices.empty()) {
         int currVertex = pendingVertices.front();
         pendingVertices.pop();
@@ -41,17 +41,20 @@ int main () {
         edges[first][second] = 1;
         edges[second][first] = 1;
     }
-
     bool *visited = new bool[numVertices];
     for (int i = 0; i < numVertices; ++i)
         visited[i] = false;
-
-    printBFS (edges, numVertices, 0, visited);
-
+	
+    // for disjoint nodes
+	for (int i = 0; i < numVertices; ++i) {
+        if (!visited[i])
+            printBFS (edges, numVertices, i, visited);
+	}
+        
     delete [] visited;
     for (int i = 0; i < numVertices; ++i)
         delete [] edges[i];
     delete [] edges;
-
+    
     return 0;
 }
