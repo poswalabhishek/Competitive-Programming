@@ -27,11 +27,11 @@ int main () {
     }
 
     int first, second;
-    int startIndex;
+    // int startIndex;
     for (int i = 0; i < numEdges; ++i){
         cin >> first >> second;
-        if (i == 0)
-            startIndex = first;
+        // if (i == 0)
+        //     startIndex = first;
         edges[first][second] = 1;
         edges[second][first] = 1;
     }
@@ -40,7 +40,7 @@ int main () {
     for (int i = 0; i < numVertices; ++i)
         visited[i] = false;
 
-    printDFS (edges, numVertices, startIndex, visited);
+    printDFS (edges, numVertices, 0, visited);
 
     delete [] visited;
     for (int i = 0; i < numVertices; ++i)
