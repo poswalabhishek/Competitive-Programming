@@ -4,24 +4,24 @@ using namespace std;
 int getMinVertex (bool *visited, int* weight, int n) {
 
     int minVertex = -1;
-    for (int i = 0; i < n; ++i) 
+    for (int i = 0; i < n; ++i) {
         if (!visited[i] && ((minVertex == -1) || (weight[minVertex] > weight[i])))
             minVertex = i;
-        
+    }
     return minVertex;
 }
 
-void prims (int **edges, int n) {
-    bool *visited = new bool[n];
-    int *weight = new int[n];
-    int *parent = new int[n];
+void prims (int edges[1000][1000], int n) {
+    bool visited[n];
+    int parent[n];
+    int weight[n];
 
     for (int i = 0; i < n; ++i) 
         weight[i] = INT_MAX;
 
     parent[0] = -1;
     weight[0] = 0;
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < n - 1; ++i) {
         // get minVertex i.e. unvisited vertex with minimum weight
         int minVertex = getMinVertex (visited, weight, n);
         visited[minVertex] = true;
@@ -37,40 +37,31 @@ void prims (int **edges, int n) {
         }
     }
 
-    for (int i = 1; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         if (parent[i] < i) 
-            cout << parent[i] << " " << i << " " << weight[i] << endl;
+            cout << parent[i] << " " << i << " " << weight << endl;
         else
-            cout << i << " " << parent[i] << " " << weight[i] << endl;
+            cout << i << " " << parent[i] << " " << weight << endl;
     }
-    delete [] visited;
-    delete [] weight;
-    delete [] parent;
 }
 
-
 int main() {
-    int n, e;
-    cin >> n >> e;
+    int v, e;
+    cin >> v >> e;
     
-    int **edges = new int*[n];
-    
-    for (int i = 0; i < n; ++i) {
-        edges[i] = new int[n];
-        for (int j = 0; j < n; ++j) 
-            edges[i][j] = 0;
-    }
-    
+    int edges[1000][1000];
+    memset (edges, 0, sizeof(edges));
+
     int a, b, weight;
     for (int i = 0; i < e; ++i) {
         cin >> a >> b >> weight;
         edges[a][b] = weight;
-        edges[b][a] = weight;
+        edges[b][a] = weight; 
     }
 
-    prims (edges, n);
-    
-    for (int i = 0; i < n; ++i)
-        delete [] edges[i];
-    delete [] edges;
+    cout << endl;
+    prims (edges, v);
+
+
+    return 0;
 }
